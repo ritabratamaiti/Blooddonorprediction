@@ -1,74 +1,58 @@
-import pip
-import numpy as numpy		
+import pandas as pd
 from sklearn.svm import SVC
 from sklearn.linear_model import Perceptron
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.naive_bayes import BernoulliNB
+from sklearn.model_selection import KFold
 from sklearn import tree
-import csv
+from tpot import TPOTClassifier
+
 
 X = []
 Y = []
-Z = []
+list_clf = []
 
-def get_data(filename):
-	x = []
-	with open(filename, 'r') as csvfile:
-		csvFileReader = csv.reader(csvfile)
-		for row in csvFileReader:
-			x.append(int(row[0]))
-			x.append(int(row[1]))
-			x.append(int(row[2]))
-			x.append(int(row[3]))
-			X.append(x)
-			x = []
-			Y.append(int(row[4]))
-	return
+df = pd.read_csv('dataset.csv', na_values = {'?'})
+df = df.values
 
-def ana_data2(filename):
-	x = []
-	ctr = 0.0
-	ctr1 = ctr2 = ctr3 = ctr4 = 0.0	
-	with open(filename, 'r') as csvfile:
-		csvFileReader = csv.reader(csvfile)
-		for row in csvFileReader:
-			ctr += 1
-			x.append(int(row[0]))
-			x.append(int(row[1]))
-			x.append(int(row[2]))
-			x.append(int(row[3]))
-			prediction = clf.predict(x)
-			pred_svm = clf_svm.predict(x)
-			pred_per = clf_perceptron.predict(x)
-			pred_KNN = clf_KNN.predict(x)
-			if(prediction[0]==int(row[4])): 
-				ctr1 += 1
-			if(pred_svm[0]==int(row[4])): 
-				ctr2 += 1
-			if(pred_per[0]==int(row[4])): 
-				ctr3 += 1
-			if(pred_KNN[0]==int(row[4])): 
-				ctr4 += 1
-			x = []
-	print("\n",ctr,ctr1,ctr2,ctr3,ctr4)
-	print("\n",ctr1/ctr,ctr2/ctr,ctr3/ctr,ctr4/ctr)
-	fh = open("out.txt", "a") 
-	fh.writelines(["\n",str(ctr1/ctr),str(ctr2/ctr),str(ctr3/ctr),str(ctr4/ctr)]) 
-	fh.close  
-	return 
 
-get_data("donor1.csv")
+X = df[:, :(df.shape[1]-1)]
+Y = df[:, df.shape[1]-1]
 
-clf = tree.DecisionTreeClassifier()
+tpot = TPOTClassifier(generations=5, population_size=50, verbosity=2)
+tpot.fit(X, Y)
+
+'''
+kf = KFold(n_splits=3)
+kf.get_n_splits(X)
+for train_index, test_index in kf.split(X):
+    X_train, X_test = X[train_index], X[test_index]
+    Y_train, Y_test = Y[train_index], Y[test_index]
+    clf.fit(X_test, Y_test)  
+    print(clf.score(X_train, Y_train))  
+
+'''
+clf_tree = tree.DecisionTreeClassifier()
 clf_svm = SVC()
 clf_perceptron = Perceptron()
 clf_KNN = KNeighborsClassifier()
+clf_nb = BernoulliNB()
 
+list_clf = [clf_tree, clf_svm, clf_perceptron, clf_KNN, clf_nb, tpot.fitted_pipeline_]
 
-clf = clf.fit(X, Y)
-clf_svm.fit(X, Y)
-clf_perceptron.fit(X, Y)
-clf_KNN.fit(X, Y)
-
-ana_data2("donor2.csv")
- 
+kf = KFold(n_splits=5)
+kf.get_n_splits(X)
+c = 1
+for clfs in list_clf:
+    print(c)
+    c += 1
+    a = 0
+    for train_index, test_index in kf.split(X):
+        X_train, X_test = X[train_index], X[test_index]
+        Y_train, Y_test = Y[train_index], Y[test_index]
+        clfs.fit(X_test, Y_test)  
+        print(clfs.score(X_train, Y_train)) 
+        a += clfs.score(X_train, Y_train)
+    a = a/5
+    print("Average=",a,"\n")
+    print(clfs,"\n")

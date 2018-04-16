@@ -1,1 +1,0 @@
-Accuracy outputs of each program run are stored here.
