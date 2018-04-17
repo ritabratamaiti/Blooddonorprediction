@@ -22,6 +22,7 @@ Y = df[:, df.shape[1]-1]
 tpot = TPOTClassifier(generations=5, population_size=50, verbosity=2)
 tpot.fit(X, Y)
 
+#ignore this commented block, it's present only for a (now) obsolete test
 '''
 kf = KFold(n_splits=3)
 kf.get_n_splits(X)
