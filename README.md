@@ -1,4 +1,6 @@
 # Blooddonorprediction
+Cite Us![![DOI](https://zenodo.org/badge/114982988.svg)](https://zenodo.org/badge/latestdoi/114982988)
+
 ## Abstract
 Thanks to digitization, we often have access to large databases, consisting of various fields of information, ranging from numbers to texts and even boolean values. Such databases lend themselves especially well to machine learning, classification and big data analysis tasks. We are able to train classifiers, using already existing data and use them for predicting the values of a certain field, given that we have information regarding the other fields. 
  
